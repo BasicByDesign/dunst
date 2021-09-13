@@ -281,7 +281,8 @@ static struct dimensions calculate_dimensions(GSList *layouts)
                 }
 
                 if (have_progress_bar(cl->n)){
-                        dim.h += settings.progress_bar_height + settings.padding;
+                        dim.h += settings.progress_bar_height;
+                        // dim.h += settings.progress_bar_height + settings.padding;
                         dim.w = MAX(dim.w, settings.progress_bar_min_width);
                 }
 
@@ -411,7 +412,8 @@ static struct colored_layout *layout_from_notification(cairo_t *c, struct notifi
         n->displayed_height = n->displayed_height + settings.padding * 2;
 
         // progress bar
-        if (have_progress_bar(n)) n->displayed_height += settings.progress_bar_height + settings.padding;
+        if (have_progress_bar(n)) n->displayed_height += settings.progress_bar_height;
+        // if (have_progress_bar(n)) n->displayed_height += settings.progress_bar_height + settings.padding;
 
         n->displayed_height = MAX(settings.notification_height, n->displayed_height);
 
@@ -461,7 +463,8 @@ static int layout_get_height(struct colored_layout *cl, double scale)
         if (cl->icon)
                 h_icon = get_icon_height(cl->icon, scale);
         if (have_progress_bar(cl->n)){
-                h_progress_bar = settings.progress_bar_height + settings.padding;
+                h_progress_bar = settings.progress_bar_height;
+                // h_progress_bar = settings.progress_bar_height + settings.padding;
         }
 
         int res = MAX(h, h_icon) + h_progress_bar;
@@ -645,7 +648,7 @@ static void render_content(cairo_t *c, struct colored_layout *cl, int width, dou
         const int h = layout_get_height(cl, scale);
         int h_without_progress_bar = h;
         if (have_progress_bar(cl->n)){
-                 h_without_progress_bar -= settings.progress_bar_height + settings.padding;
+                 h_without_progress_bar -= settings.progress_bar_height;
         }
         int h_text;
         get_text_size(cl->l, NULL, &h_text, scale);
@@ -683,6 +686,8 @@ static void render_content(cairo_t *c, struct colored_layout *cl, int width, dou
                              image_x = width - settings.h_padding - image_width,
                              image_y = settings.padding + h_without_progress_bar/2 - image_height/2;
 
+                // compensate for progress bar
+
                 // vertical alignment
                 if (settings.vertical_alignment == VERTICAL_TOP) {
                         image_y = settings.padding;
@@ -706,10 +711,11 @@ static void render_content(cairo_t *c, struct colored_layout *cl, int width, dou
         if (have_progress_bar(cl->n)){
                 int progress = MIN(cl->n->progress, 100);
                 unsigned int frame_width = settings.progress_bar_frame_width,
-                             progress_width = MIN(width - 2 * settings.h_padding, settings.progress_bar_max_width),
+                             progress_width = width + 4,
                              progress_height = settings.progress_bar_height - frame_width,
-                             frame_x = settings.h_padding,
-                             frame_y = settings.padding + h - settings.progress_bar_height,
+                             frame_x = -1,
+                             // frame_y = settings.padding + h - settings.progress_bar_height,
+                             frame_y = settings.padding + h + settings.progress_bar_height + 2,
                              progress_width_without_frame = progress_width - 2 * frame_width,
                              progress_width_1 = progress_width_without_frame * progress / 100,
                              progress_width_2 = progress_width_without_frame - progress_width_1,
